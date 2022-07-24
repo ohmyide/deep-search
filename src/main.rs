@@ -12,8 +12,8 @@ fn main() -> Result<(), Error> {
     let version = env!("CARGO_PKG_VERSION");
     let matches = App::new("rust-search")
         .version(version)
-        .author("ohmyide")
-        .about("A text search engine written in Rust")
+        .author("ohmyide - https://github.com/ohmyide/aiwriter-cli-check")
+        .about("A Tiny, Static, Full-text Search with Rust")
         .arg(
             Arg::with_name("keyword")
                 // .short('t')
