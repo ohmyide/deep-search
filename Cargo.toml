@@ -1,13 +1,11 @@
 [package]
 name = "aiwriteclicheck"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-indextree = { version = "4.3.1" }
-serde_indextree = "0.2.0"
-clap = "2.33.3"
-serde = {version = "1.0.130", features = ["derive"]}
-serde_json = {version = "1.0.68"}
+clap = "3.2.14"
+termcolor = "1.1.0"
+content_inspector = "0.2.4"

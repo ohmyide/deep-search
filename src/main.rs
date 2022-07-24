@@ -1,136 +1,102 @@
 use std::{
     env,
-    fs::{self},
     io::{Error, ErrorKind},
     path::Path,
 };
-// use std::error::Error;
+use std::ffi::OsStr;
+use clap::{App, Arg};
 
-use indextree::{Arena, NodeId};
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct PathNode {
-    name: String,
-    relative_path: String,
-    absolute_path: String,
-    node_type: NodeType,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-enum NodeType {
-    File,
-    Directory,
-}
+use aiwriteclicheck:: {get_directory_list, search_in_file};
 
 fn main() -> Result<(), Error> {
+    let version = env!("CARGO_PKG_VERSION");
+    let matches = App::new("rust-search")
+        .version(version)
+        .author("ohmyide")
+        .about("A text search engine written in Rust")
+        .arg(
+            Arg::with_name("keyword")
+                // .short('t')
+                // .long("traverse")
+                .value_name("KETWORD")
+                .help("The keywords you want to search for")
+                .required(true)
+                .index(1)
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("path")
+                .value_name("PATH")
+                .help("The file or folder you want to search")
+                .required(true)
+                .index(2)
+                .multiple(false)
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("case_ignore")
+                .short('c')
+                .multiple(false)
+                .help("Case ignore"),
+        )
+        .arg(
+            Arg::with_name("recursive")
+                .short('r')
+                .multiple(false)
+                .help("Traverse hierarchy recursively"),
+        )
+        .get_matches();
 
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 3 {
-        // return Error("not enough arguments");
-        print!("not enough arguments");
-    }
+    
+    let case_ignore = matches.is_present("case_ignore");
+    let recursive = matches.is_present("recursive");
 
-    let query = args[1].clone();
-    let directory_path = args[2].clone();
+    if let Some(directory_path) = matches.value_of("path") {
+        if let Some(keyword) = matches.value_of("keyword") {
+            let root_path = Path::new(&directory_path);
+            let mut absolute_path = std::env::current_dir()?;
+            absolute_path.push(root_path);
 
-    let root_path = Path::new(&directory_path);
-
-    if root_path.is_dir() {
-        let mut absolute_path = std::env::current_dir()?;
-        absolute_path.push(root_path);
-
-        let arena = &mut Arena::new();
-
-        let root_node = arena.new_node(PathNode {
-            name: directory_path.to_string(),
-            node_type: NodeType::Directory,
-            relative_path: directory_path.to_string(),
-            absolute_path: absolute_path.display().to_string(),
-        });
-
-        let recursive = false;
-        traverse(&query, &directory_path, arena, root_node, recursive)?;
-        Ok(())
+            walk(&keyword, &absolute_path, recursive, case_ignore)?;
+            Ok(())
+        } else {
+            eprintln!("Invalid keyword.");
+            Result::Err(Error::new(
+                ErrorKind::InvalidInput,
+                format!("Invalid directory: keyword"),
+            ))
+        }
+        
     } else {
-        eprintln!("Invalid directory.");
         Result::Err(Error::new(
             ErrorKind::InvalidInput,
-            format!("Invalid directory: {}", directory_path),
+            format!("Invalid directory"),
         ))
     }
+
 }
 
-fn traverse(
-    query: &str,
-    path: &str,
-    arena: &mut Arena<PathNode>,
-    parent: NodeId,
-    recursive: bool,
-) -> Result<(), Error> {
-    // println!("*****************absolute_path{}")
-    let dir_listing = get_directory_listing(path);
-    for entry in dir_listing {
-        let temp_path = Path::new(entry.as_str());
-        let mut absolute_path = std::env::current_dir()?;
-        absolute_path.push(temp_path);
-
-        if temp_path.is_dir() {
-            let dir_object = arena.new_node(PathNode {
-                name: String::from(temp_path.file_name().unwrap().to_str().unwrap()),
-                relative_path: String::from(entry.as_str()),
-                absolute_path: absolute_path.display().to_string(),
-                node_type: NodeType::Directory,
-            });
-
-            parent.append(dir_object, arena);
-
-            if recursive {
-                traverse(&query, entry.as_str(), arena, dir_object, recursive)?;
+fn walk(keyword: &str, path: &Path, recursive: bool, case_ignore: bool) -> Result<(), Error> {
+    let git_dir: &OsStr = OsStr::new(".git");
+    let node_modules: &OsStr = OsStr::new("node_modules");
+    if path.is_dir() {
+        let dir_listing = get_directory_list(path);
+        for entry in dir_listing {
+            let temp_path = Path::new(&entry);
+            let filename = temp_path.file_name();
+            if temp_path.is_dir() {
+                if !recursive {
+                    continue;
+                }
+                if filename != Some(git_dir) && filename != Some(node_modules) {
+                    walk(&keyword, temp_path, recursive, case_ignore)?;
+                }
+            } else {
+                search_in_file(&keyword, temp_path, case_ignore).ok();
             }
-        } else {
-            let file_object = arena.new_node(PathNode {
-                name: String::from(temp_path.file_name().unwrap().to_str().unwrap()),
-                relative_path: String::from(entry.as_str()),
-                absolute_path: absolute_path.display().to_string(),
-                node_type: NodeType::File,
-            });
-
-            let relative = absolute_path.display().to_string();
-            // let relative = String::from(entry.as_str());
-            // let mut absolute_path = std::env::current_dir()?;
-            // absolute_path.push(&relative);
-            let path = Path::new(&relative);
-
-            let contents = fs::read_to_string(path)?;
-            // let query = "卡片";
-            let results = search(&query, &contents);
-
-            // 输出搜索结果
-            for line in results {
-                println!("===== search result begin ====");
-                println!("{}", line);
-                println!("===== search result end ======");
-                println!("");
-            }
-
-            parent.append(file_object, arena);
         }
+    } else {
+        search_in_file(&keyword, path, case_ignore).ok();
     }
-
     Ok(())
-}
-
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    contents
-        .lines()
-        .filter(|line| line.contains(query))
-        .collect()
-}
-
-fn get_directory_listing(directory_path: &str) -> Vec<String> {
-    fs::read_dir(directory_path)
-        .unwrap()
-        .map(|x| x.unwrap().path().to_str().unwrap().to_string())
-        .collect()
 }
