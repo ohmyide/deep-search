@@ -35,7 +35,8 @@ pub fn search_in_file(keyword: &str, path: &Path, case_ignore: bool) -> Result<(
             let mut stdout = StandardStream::stdout(ColorChoice::Always);
             let mut index = 0;
             if results.len() > 0 {
-                stdout.set_color(ColorSpec::new().set_fg(Some(Color::Rgb(215,102,239))))?;
+                // stdout.set_color(ColorSpec::new().set_fg(Some(Color::Rgb(215,102,239))))?;
+                stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
                 println!("{}:",path.display());
             }
             // 输出搜索结果
@@ -45,7 +46,9 @@ pub fn search_in_file(keyword: &str, path: &Path, case_ignore: bool) -> Result<(
                 print!("{index}: ");
                 stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)))?;
                 println!("{}",line);
-                println!("");
+                println!(" ");
+                stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)))?;
+
             }
         }
     }
