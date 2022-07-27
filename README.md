@@ -10,7 +10,7 @@ cargo run <keyword> <path>
 ## Command-line options
 ```
 USAGE:
-    aiwriteclicheck <KETWORD> <PATH> [OPTIONS]
+    rust-search <KETWORD> <PATH> [OPTIONS]
 
 ARGS:
     <KETWORD>    The keywords you want to search for

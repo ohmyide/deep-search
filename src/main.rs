@@ -6,13 +6,13 @@ use std::{
 use std::ffi::OsStr;
 use clap::{App, Arg};
 
-use aiwriteclicheck:: {get_directory_list, search_in_file};
+use rustsearch:: {get_directory_list, search_in_file};
 
 fn main() -> Result<(), Error> {
     let version = env!("CARGO_PKG_VERSION");
     let matches = App::new("rust-search")
         .version(version)
-        .author("ohmyide - https://github.com/ohmyide/aiwriter-cli-check")
+        .author("ohmyide - https://github.com/ohmyide/rust-search")
         .about("A Tiny, Static, Full-text Search with Rust")
         .arg(
             Arg::with_name("keyword")
