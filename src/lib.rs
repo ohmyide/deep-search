@@ -35,7 +35,6 @@ pub fn search_in_file(keyword: &str, path: &Path, case_ignore: bool) -> Result<(
             let mut stdout = StandardStream::stdout(ColorChoice::Always);
             let mut index = 0;
             if results.len() > 0 {
-                // stdout.set_color(ColorSpec::new().set_fg(Some(Color::Rgb(215,102,239))))?;
                 stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
                 println!("{}:",path.display());
             }
@@ -89,10 +88,3 @@ pub fn search_case_insensitive<'a>(
     results
 }
 
-// // #[cfg(test)]
-// mod tests {
-//     #[test]
-//     fn test_search() {
-//         assert_eq!(2 + 2, 4);
-//     }
-// }

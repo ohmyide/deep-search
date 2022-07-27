@@ -28,7 +28,7 @@ fn main() -> Result<(), Error> {
             Arg::with_name("path")
                 .value_name("PATH")
                 .help("The file or folder you want to search")
-                .required(true)
+                .required(false)
                 .index(2)
                 .multiple(false)
                 .takes_value(true),
@@ -43,34 +43,30 @@ fn main() -> Result<(), Error> {
             Arg::with_name("recursive")
                 .short('r')
                 .multiple(false)
-                .help("Traverse hierarchy recursively"),
+                .help("Disable Recursion"),
         )
         .get_matches();
 
     
     let case_ignore = matches.is_present("case_ignore");
     let recursive = matches.is_present("recursive");
+    let directory_path = matches.value_of("path");
 
-    if let Some(directory_path) = matches.value_of("path") {
-        if let Some(keyword) = matches.value_of("keyword") {
-            let root_path = Path::new(&directory_path);
-            let mut absolute_path = std::env::current_dir()?;
-            absolute_path.push(root_path);
-
-            walk(&keyword, &absolute_path, recursive, case_ignore)?;
-            Ok(())
-        } else {
-            eprintln!("Invalid keyword.");
-            Result::Err(Error::new(
-                ErrorKind::InvalidInput,
-                format!("Invalid directory: keyword"),
-            ))
-        }
-        
+    let root_path;
+    if directory_path.is_none() {
+        root_path = Path::new("./");
     } else {
+        root_path = Path::new(directory_path.as_deref().unwrap_or("./"));
+    }
+
+    if let Some(keyword) = matches.value_of("keyword") {
+        walk(&keyword, &root_path, recursive, case_ignore)?;
+        Ok(())
+    } else {
+        eprintln!("Invalid keyword.");
         Result::Err(Error::new(
             ErrorKind::InvalidInput,
-            format!("Invalid directory"),
+            format!("Invalid directory: keyword"),
         ))
     }
 
@@ -85,7 +81,7 @@ fn walk(keyword: &str, path: &Path, recursive: bool, case_ignore: bool) -> Resul
             let temp_path = Path::new(&entry);
             let filename = temp_path.file_name();
             if temp_path.is_dir() {
-                if !recursive {
+                if recursive {
                     continue;
                 }
                 if filename != Some(git_dir) && filename != Some(node_modules) {
@@ -98,5 +94,7 @@ fn walk(keyword: &str, path: &Path, recursive: bool, case_ignore: bool) -> Resul
     } else {
         search_in_file(&keyword, path, case_ignore).ok();
     }
+    
+    
     Ok(())
 }
