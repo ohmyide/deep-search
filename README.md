@@ -1,4 +1,4 @@
-# rust-search
+# deep-search
 A Tiny, Static, Full-text Search with Rust
 
 ## Usage
@@ -10,7 +10,7 @@ cargo run <keyword> <path>
 ## Command-line options
 ```
 USAGE:
-    rust-search <KETWORD> <PATH> [OPTIONS]
+    deep-search <KETWORD> <PATH> [OPTIONS]
 
 ARGS:
     <KETWORD>    The keywords you want to search for
