@@ -37,7 +37,7 @@ cargo run <keyword> <path> -r -c
 ```
 
 
-demo:
+example:
 
 ```
 cargo run Rust ./tests ./tests -r -c
