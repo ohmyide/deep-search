@@ -1,5 +1,5 @@
 # deep-search（ds）
-A Tiny, Static, Full-text Search with Rust
+A Tiny, Static, Full-text Search with Rust 🦀
 
 ![ds](/doc/logo.png "deep-search")
 
