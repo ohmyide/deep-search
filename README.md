@@ -1,16 +1,18 @@
-# deep-search
+# deep-search（ds）
 A Tiny, Static, Full-text Search with Rust
+
+![ds](/doc/logo.png "deep-search")
 
 ## Usage
 
 ```
-cargo run <keyword> <path>
+ds <keyword> <path>
 ```
 
 ## Command-line options
 ```
 USAGE:
-    deep-search <KETWORD> <PATH> [OPTIONS]
+    ds <KETWORD> <PATH> [OPTIONS]
 
 ARGS:
     <KETWORD>    The keywords you want to search for
@@ -19,15 +21,15 @@ ARGS:
 OPTIONS:
     -c               Case ignore
     -h, --help       Print help information
-    -r               Traverse hierarchy recursively
+    -r               Cancel recursive traversal of hierarchy
     -V, --version    Print version information
 ```
 
 ## Demo
-Add the `-r` argument to traverse hierarchy recursively.
+Add the `-r` argument to cancel traverse hierarchy recursively.
 
 ```
-cargo run <keyword> <path> -r
+ds <keyword> -r
 ```
 
 Add the `-c` argument to case insensitive.
@@ -40,5 +42,5 @@ cargo run <keyword> <path> -r -c
 example:
 
 ```
-cargo run Rust ./tests ./tests -r -c
+ds helloworld
 ```
