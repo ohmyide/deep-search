@@ -1,3 +1,4 @@
+cargo-features = ["edition2021"]
 [package]
 name = "deepsearch"
 version = "0.0.2"
@@ -10,6 +11,6 @@ name = "ds"
 path = "src/main.rs"
 
 [dependencies]
-clap = "3.2.14"
+clap = "~3.1.17"
 termcolor = "1.1.0"
 content_inspector = "0.2.4"
